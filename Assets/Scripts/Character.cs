@@ -20,16 +20,20 @@ public class Character : MonoBehaviour
     //Fim / void realated
     Vector2 startPosition;
 
+    //shot
+    public Transform projetil;
+    bool olhandoDireita = true;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
 
         //speed related vars
-        aceleracao = 50;
+        aceleracao = 30;
         speedMaxima = 7;
 
         //jump
-        jumpForce = 15;
+        jumpForce = 70;
 
         moedas = 0;
 
@@ -37,10 +41,35 @@ public class Character : MonoBehaviour
         startPosition = transform.position;
     }
 
-    void FixedUpdate()
+    private void Update()
     {
         //movement
         movimento = Input.GetAxisRaw("Horizontal");
+        //flip
+        if (movimento == 1)
+        {
+            transform.eulerAngles = new Vector2(0, 0);
+            olhandoDireita=true;
+        }
+
+        if (movimento == -1)
+        {
+            transform.eulerAngles = new Vector2(0, 180);
+            olhandoDireita=false;
+        }
+
+        //shot
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            //Debug.Log("tiro");
+            Transform instance = Instantiate(projetil);
+            instance.position = transform.position;
+            instance.GetComponent<Projetil>().enabled = true;
+
+            //ta olhando pra direita? entao o vector2 positivo se nao negativo
+            instance.GetComponent<Projetil>().direcao = new Vector2(olhandoDireita ? 1 : -1, 0);
+        }
+
         rb.AddForce(new Vector2(movimento * aceleracao, 0));
 
         speedAtual = rb.linearVelocityX; //linearvelo.x ??
@@ -50,6 +79,11 @@ public class Character : MonoBehaviour
         {
             rb.linearVelocityX = 0;
         }
+        
+    }
+
+    private void FixedUpdate()
+    {
         //jump
         canJump = Physics2D.Raycast(
                 transform.position,
@@ -58,7 +92,7 @@ public class Character : MonoBehaviour
                 LayerMask.GetMask("Ground")
             );
 
-        jump = Input.GetAxisRaw("Jump") > 0; 
+        jump = Input.GetAxisRaw("Jump") > 0;
 
         if (jump && canJump)
         {
@@ -69,7 +103,6 @@ public class Character : MonoBehaviour
 
         }
     }
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.name.Contains("Moeda"))
