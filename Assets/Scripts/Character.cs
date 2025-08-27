@@ -139,9 +139,13 @@ public class Character : MonoBehaviour
             moedas = 0;
             textoMoedas.text = $"Moedas: <color=yellow>0</color>";
 
-            textoMorreu.enabled = true;
-            Invoke("disableMorreu", 2);
-            transform.position = startPosition;
+            if(vida <= 0)
+            {
+                textoMorreu.enabled = true;
+                Invoke("disableMorreu", 2);
+                transform.position = startPosition;
+            }
+                textoGameOver.enabled = true;
 
             vida--;
             if (vida >= 3)
@@ -153,10 +157,6 @@ public class Character : MonoBehaviour
             if (vida <= 0)
                 textoVidas.text = $"Vidas: <color=black>{vida}</color>";
 
-            if(vida <= 0)
-            {
-                textoGameOver.enabled = true;
-            }
         }
         if (collision.gameObject.name.Contains("Fim"))
         {
