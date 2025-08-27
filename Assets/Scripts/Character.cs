@@ -14,31 +14,53 @@ public class Character : MonoBehaviour
     public float jumpForce;
     bool jump = false;
 
-    //Moedas
-    [SerializeField] int moedas;
+    //atributos
+    int moedas;
+    int vida;
+
+    //textos
+    TextMeshProUGUI textoMoedas;
+    TextMeshProUGUI textoVidas;
+    TextMeshProUGUI textoMorreu;
+    TextMeshProUGUI textoGameOver;
 
     //Fim / void realated
     Vector2 startPosition;
+    TextMeshProUGUI gameOver;
 
     //shot
-    public Transform projetil;
+    Transform projetil;
     bool olhandoDireita = true;
+
+    //vida
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
 
-        //speed related vars
+        //speed
         aceleracao = 30;
         speedMaxima = 7;
 
         //jump
         jumpForce = 70;
 
+        //atributos
         moedas = 0;
+        vida = 3;
+
+        //Ui
+        textoMoedas = GameObject.Find("MoedasTxt").transform.GetComponent<TextMeshProUGUI>();
+        textoMorreu = GameObject.Find("MorreuTxt").transform.GetComponent<TextMeshProUGUI>();
+        textoGameOver = GameObject.Find("GameOver").transform.GetComponent<TextMeshProUGUI>();
+        textoVidas = GameObject.Find("VidaTxt").transform.GetComponent<TextMeshProUGUI>();
+
+        //tiro
+        projetil = GameObject.Find("Tiro").transform;
 
         //Fim / void realated
         startPosition = transform.position;
+
     }
 
     private void Update()
@@ -107,16 +129,34 @@ public class Character : MonoBehaviour
     {
         if (collision.gameObject.name.Contains("Moeda"))
         {
-            moedas++;
-            Debug.Log($"Pegou uma moeda!! moedas atuais {moedas}");
             Destroy(collision.gameObject);
+            moedas++;
+            textoMoedas.text = $"Moedas: <color=yellow>{moedas}</color>";
         }
 
         if (collision.gameObject.name.Contains("Void"))
         {
             moedas = 0;
-            Debug.Log(" Voce caiu e perdeu todas as moedas! ");
+            textoMoedas.text = $"Moedas: <color=yellow>0</color>";
+
+            textoMorreu.enabled = true;
+            Invoke("disableMorreu", 2);
             transform.position = startPosition;
+
+            vida--;
+            if (vida >= 3)
+                textoVidas.text = $"Vidas: <color=green>{vida}</color>";
+            if (vida == 2)
+                textoVidas.text = $"Vidas: <color=yellow>{vida}</color>";
+            if (vida == 1)
+                textoVidas.text = $"Vidas: <color=red>{vida}</color>";
+            if (vida <= 0)
+                textoVidas.text = $"Vidas: <color=black>{vida}</color>";
+
+            if(vida <= 0)
+            {
+                textoGameOver.enabled = true;
+            }
         }
         if (collision.gameObject.name.Contains("Fim"))
         {
@@ -124,6 +164,11 @@ public class Character : MonoBehaviour
         }
 
 
+    }
+
+    void disableMorreu()
+    {
+        textoMorreu.enabled = false;
     }
 
     
