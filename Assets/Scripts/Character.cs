@@ -6,13 +6,13 @@ public class Character : MonoBehaviour
     Rigidbody2D rb;
 
     //move related vars
-    public float aceleracao = 30;
-    public float speedMaxima = 7;
+    public float aceleracao = 10;
+    public float speedMaxima = 5;
     float movimento, speedAtual;
 
     //jump related vars
     public bool canJump;
-    public float jumpForce = 70;
+    public float jumpForce = 2;
     bool jump = false;
     public float alturaRCast = 1.5f; //preencher com a distancia do ponto central ate o chao 
 
@@ -28,20 +28,22 @@ public class Character : MonoBehaviour
 
     //Fim / void realated
     Vector2 startPosition;
-    TextMeshProUGUI gameOver;
 
     //shot
     Transform projetil;
     bool olhandoDireita = true;
 
-    //vida
+    //Animação
+
+    Animator animator;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
 
         //Ui
-        textoMoedas = GameObject.Find("MoedasTxt").transform.GetComponent<TextMeshProUGUI>();
+        textoMoedas = GameObject.Find("MoedasTxt").transform.GetComponent<TextMeshProUGUI>();   
         textoMorreu = GameObject.Find("MorreuTxt").transform.GetComponent<TextMeshProUGUI>();
         textoGameOver = GameObject.Find("GameOver").transform.GetComponent<TextMeshProUGUI>();
         textoVidas = GameObject.Find("VidaTxt").transform.GetComponent<TextMeshProUGUI>();
@@ -62,17 +64,18 @@ public class Character : MonoBehaviour
     {
         //movement
         movimento = Input.GetAxisRaw("Horizontal");
+
         //flip
         if (movimento == 1)
         {
             transform.eulerAngles = new Vector2(0, 0);
-            olhandoDireita=true;
+            olhandoDireita = true;
         }
 
         if (movimento == -1)
         {
             transform.eulerAngles = new Vector2(0, 180);
-            olhandoDireita=false;
+            olhandoDireita = false;
         }
 
         //shot
@@ -96,11 +99,21 @@ public class Character : MonoBehaviour
         {
             rb.linearVelocityX = 0;
         }
-        
-    }
 
-    private void FixedUpdate()
-    {
+        //======== ANIMAÇÃO ========
+        if (canJump)
+        {
+            //walk
+            if (rb.linearVelocityX <= 0.2f && rb.linearVelocityX >= -0.2f)
+            {
+                animator.SetBool("estaAndando", false);
+            }
+            else
+            {
+                animator.SetBool("estaAndando", true);
+            }
+        }
+
         //jump
         canJump = Physics2D.Raycast(
                 transform.position,
@@ -111,6 +124,8 @@ public class Character : MonoBehaviour
 
         jump = Input.GetAxisRaw("Jump") > 0;
 
+        animator.SetBool("estaPulando", !canJump);
+
         if (jump && canJump)
         {
             //Debug.Log($"pulou {jumpForce} * {aceleracao}");
@@ -120,6 +135,7 @@ public class Character : MonoBehaviour
 
         }
     }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.name.Contains("Moeda"))
@@ -134,14 +150,16 @@ public class Character : MonoBehaviour
             moedas = 0;
             textoMoedas.text = $"Moedas: <color=yellow>0</color>";
 
-            if(vida <= 0)
+            if (vida <= 0)
             {
                 textoMorreu.enabled = true;
                 Invoke("disableMorreu", 2);
                 transform.position = startPosition;
             }
+            else
+            {
                 textoGameOver.enabled = true;
-
+            }
             vida--;
             if (vida >= 3)
                 textoVidas.text = $"Vidas: <color=green>{vida}</color>";
@@ -166,5 +184,4 @@ public class Character : MonoBehaviour
         textoMorreu.enabled = false;
     }
 
-    
 }
