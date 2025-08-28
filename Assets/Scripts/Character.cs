@@ -6,13 +6,15 @@ public class Character : MonoBehaviour
     Rigidbody2D rb;
 
     //move related vars
-    public float aceleracao, speedMaxima; 
+    public float aceleracao = 30;
+    public float speedMaxima = 7;
     float movimento, speedAtual;
 
     //jump related vars
     public bool canJump;
-    public float jumpForce;
+    public float jumpForce = 70;
     bool jump = false;
+    public float alturaRCast = 1.5f; //preencher com a distancia do ponto central ate o chao 
 
     //atributos
     int moedas;
@@ -38,22 +40,15 @@ public class Character : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
 
-        //speed
-        aceleracao = 30;
-        speedMaxima = 7;
-
-        //jump
-        jumpForce = 70;
-
-        //atributos
-        moedas = 0;
-        vida = 3;
-
         //Ui
         textoMoedas = GameObject.Find("MoedasTxt").transform.GetComponent<TextMeshProUGUI>();
         textoMorreu = GameObject.Find("MorreuTxt").transform.GetComponent<TextMeshProUGUI>();
         textoGameOver = GameObject.Find("GameOver").transform.GetComponent<TextMeshProUGUI>();
         textoVidas = GameObject.Find("VidaTxt").transform.GetComponent<TextMeshProUGUI>();
+
+        //atributos
+        moedas = 0;
+        vida = 3;
 
         //tiro
         projetil = GameObject.Find("Tiro").transform;
@@ -110,7 +105,7 @@ public class Character : MonoBehaviour
         canJump = Physics2D.Raycast(
                 transform.position,
                 Vector2.down,
-                0.6f,
+                alturaRCast,
                 LayerMask.GetMask("Ground")
             );
 
